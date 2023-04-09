@@ -1,58 +1,70 @@
 <?php
+session_start();
 include("../dbContext.php");
-$name = $surname = $email =  $password = "";
-$name_err = $surname_err = $email_err =  $password_err = "";
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-
-    //see if this email exist in database
-    $checkExist = "SELECT * FROM `users` WHERE Email = '$_POST[email]'";
-    $checkResult = mysqli_query($conn, $checkExist);
-    if (mysqli_num_rows($checkResult) == 1) {
-        echo ("<script>alert('This email is registeret before!');</script>");
-        header("Location: ../index.php");
-        exit;
-    }
-    //processing form data when form is submitted
-    if (empty(trim($_POST["name"]))) {
-        $name_err = "Please enter name.";
-    } else {
-        $name = trim($_POST["name"]);
-    }
-    if (empty(trim($_POST["surname"]))) {
-        $surname_err = "Please enter surname.";
-    } else {
-        $surname = trim($_POST["surname"]);
-    }
-    if (empty(trim($_POST["email"]))) {
-        $email_err = "Please enter email.";
-    } else {
-        $email = trim($_POST["email"]);
-        $_SESSION['firstEmail'] = $email;
-    }
-
-    if (empty(trim($_POST["password"]))) {
-        $password_err = "Please enter your password.";
-    } else {
-        $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    }
-    // Prepare the SQL statement to insert user
-    if (empty($name_err) && empty($surname_err) && empty($email_err) && empty($password_err)) {
-        $sql = "INSERT INTO `users`(`Name`, `Surname`, `Email`, `Password_hash`,`isActivated`) VALUES ('$name','$surname','$email','$password','0')";
-        $sqlResult = mysqli_query($conn, $sql);
-        $getInsertetUser = "SELECT * FROM `users` WHERE Email = '$_POST[email]'";
-        $userResult = mysqli_query($conn, $getInsertetUser);
-        $row = mysqli_fetch_assoc($userResult);
-        $insertUserRole = "INSERT INTO `user_roles`(`User_Id`, `Role_Id`) VALUES ('$row[Id]','2')";
-        $insertetRoleResult = mysqli_query($conn, $insertUserRole);
-        echo ("<script>alert('User is register succesfully!');</script>");
-        include("emailSender.php");
-        header("Location: ../index.php");
-        exit;
+$incorrect_old_pass = $incorrect_new_pass = "";
+$incorrect_repeat_pass = "";
+$oldPass = $newPass = $repeatPass = "";
+$password_match_error = '';
+$actual_pass_error = '';
+if (isset($_SESSION["email"])) {
+    $email = $_SESSION['email'];
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        if (empty(trim($_POST["actualPass"]))) {
+            $incorrect_old_pass = "Please enter old password!";
+        } else {
+            $oldPass = trim($_POST["actualPass"]);
+        }
+        if (empty(trim($_POST["newPass"]))) {
+            $incorrect_new_pass = "Please enter new password!";
+        } else {
+            $newPass = trim($_POST["newPass"]);
+        }
+        if (empty(trim($_POST["repeatPass"]))) {
+            $incorrect_repeat_pass = "Please repeat password!";
+        } else {
+            $repeatPass = trim($_POST["repeatPass"]);
+        }
+        //check if password is correct
+        $oldPassHash = password_hash($oldPass, PASSWORD_DEFAULT);
+        $getActualPass = "SELECT * FROM users WHERE Email='$email'";
+        $result = mysqli_query($conn, $getActualPass);
+        $row = mysqli_fetch_assoc($result);
+        if ($oldPass != '') {
+            echo("Password_hash" . $row['Password_hash']);
+            echo("old pass: " . $oldPassHash);
+            if (password_verify($oldPass,PASSWORD_DEFAULT)) {
+                $actual_pass_error = "Old password is wrong!";
+                $oldPass = '';
+                $newPass = '';
+                $repeatPass = '';
+            }
+        } else {
+            if ($newPass != '' && $repeatPass != '') {
+                if ($newPass == $repeatPass) {
+                    $sql = "SELECT * FROM users WHERE Email='$email'";
+                    $result = mysqli_query($conn, $sql);
+                    if ($result != null) {
+                        // Get user's password hash from database
+                        $row = mysqli_fetch_assoc($result);
+                        //$hash = $row['Password'];
+                        $hash = password_hash($_POST['newPass'], PASSWORD_DEFAULT);
+                        $updateSql = "UPDATE `users` SET `Password_hash`='$hash' WHERE Email='$email'";
+                        $sqlResult = mysqli_query($conn, $updateSql);
+                    }
+                } else {
+                    $password_match_error = "Password doesn't match!";
+                    $oldPass = '';
+                    $newPass = '';
+                    $repeatPass = '';
+                }
+            }
+        }
     }
 }
+
+
+
 ?>
-
-
 
 <!doctype html>
 <html class="no-js" lang="zxx">
@@ -97,51 +109,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <!-- Preloader Start-->
 
 
-    <!-- Register -->
-
     <main class="login-body" data-vide-bg="../assets/img/hero/login.jpg">
-
         <!-- Login Admin -->
-        <form class="form-default" action="../Authentication/register.php" method="POST">
+
+        <form class="form-default" action="../Authentication/resetPassword.php" method="post">
 
             <div class="login-form">
                 <?php
-                if (!empty($name_err) || !empty($password_err) || !empty($email_err) || !empty($surname_err)) {
-                    echo '<div class="alert alert-danger">' . $name_err . "<br>" . $surname_err .
-                        "<br>" . $email_err . "<br>" .  $password_err . '</div>';
+                if (!empty($incorrect_old_pass) || !empty($incorrect_new_pass) || !empty($incorrect_repeat_pass)) {
+                    echo '<div class="alert alert-danger">' . $incorrect_old_pass . "<br>" . $incorrect_new_pass . "<br>" . $incorrect_repeat_pass . "<br>" . '</div>';
+                }
+                ?>
+                <?php
+                if (!empty($password_match_error)) {
+                    echo '<div class="alert alert-danger">' . $password_match_error . "<br>" . '</div>';
+                }
+                ?>
+                <?php
+                if (!empty($actual_pass_error)) {
+                    echo '<div class="alert alert-danger">' . $actual_pass_error . "<br>" . '</div>';
                 }
                 ?>
                 <!-- logo-login -->
                 <div class="logo-login">
-                    <a href="../index.php"><img src="../assets/img/logo/loder.png" alt=""></a>
+                    <a href="index.html"><img src="../assets/img/logo/loder.png" alt=""></a>
                 </div>
-                <h2>Registration Here</h2>
-
+                <h2>Reset Password</h2>
                 <div class="form-input">
-                    <label for="name">Name</label>
-                    <input type="text" name="name" value="<?php echo $name; ?>">
-                </div>
-                <div class="form-input">
-                    <label for="name">Surname</label>
-                    <input type="text" name="surname" value="<?php echo $surname; ?>">
+                    <label for="actualPass">Actual Password</label>
+                    <input type="password" name="actualPass" value="<?php echo $oldPass; ?>">
                 </div>
                 <div class="form-input">
-                    <label for="name">Email Address</label>
-                    <input type="email" name="email" value="<?php echo $email; ?>">
+                    <label for="newPass">New Password</label>
+                    <input type="password" name="newPass" value="<?php echo $newPass; ?>">
                 </div>
                 <div class="form-input">
-                    <label for="name">Password</label>
-                    <input type="password" name="password" value="<?php echo $password; ?>">
-                </div>
-                <div class="form-input">
-                    <label for="name">Confirm Password</label>
-                    <input type="password" name="password" value="<?php echo $password; ?>">
+                    <label for="repeatPass">Repeat New Password</label>
+                    <input type="password" name="repeatPass" value="<?php echo $repeatPass; ?>">
                 </div>
                 <div class="form-input pt-30">
-                    <input type="submit" name="submit" value="Registration">
+                    <input type="submit" name="submit" value="ResetPassword">
                 </div>
-                <!-- Forget Password -->
-                <a href="../Authentication/login.php" class="registration">Login</a>
                 <a href="../index.php" class="registration">Home</a>
             </div>
         </form>

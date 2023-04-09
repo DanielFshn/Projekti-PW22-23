@@ -1,6 +1,6 @@
 <?php
 session_start();
-include "../dbContext.php.php";
+include "../dbContext.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $user_email = $_POST['Email'];
