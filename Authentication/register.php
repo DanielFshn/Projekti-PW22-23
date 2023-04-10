@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $row = mysqli_fetch_assoc($userResult);
         $insertUserRole = "INSERT INTO `user_roles`(`User_Id`, `Role_Id`) VALUES ('$row[Id]','2')";
         $insertetRoleResult = mysqli_query($conn, $insertUserRole);
-        echo ("<script>alert('User is register succesfully!');</script>");
+        echo ("<script>alert('User is register succesfully! Please go to your email to verify account!');</script>");
         include("emailSender.php");
         header("Location: ../index.php");
         exit;

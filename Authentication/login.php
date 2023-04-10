@@ -1,7 +1,7 @@
 <?php
 include("../dbContext.php");
 if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
-    header("location: ../index.php");
+    header("Location: ../index.php");
     exit;
 }
 $incorrect_email = $incorrect_password = "";
@@ -25,32 +25,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     //$email = $_POST['email'];
     //$password = $_POST['password'];
-    $sql = "SELECT * FROM users WHERE Email='$email'";
-    $result = mysqli_query($conn, $sql);
-    if ($result != null) {
-        // Get user's password hash from database
-        $row = mysqli_fetch_assoc($result);
-        //$hash = $row['Password'];
-        $hash = password_hash($_POST['password'], PASSWORD_DEFAULT);
-        // Verify password
-        if (password_verify($password, $hash)) {
-            // Start session and redirect to home page
-            session_start();
-            $_SESSION['username'] = $row['Name'];
-            $_SESSION['surname'] = $row["Surname"];
-            $_SESSION['email'] = $row["Email"];
-            $_SESSION['loggedin'] === true;
-            header("Location: ../index.php");
-            exit;
-        } else {
-            $incorrect_password = "Incorrect password!";
+    if ($email != '' && $password != '') {
+        $sql = "SELECT * FROM users WHERE Email='$email'";
+        $result = mysqli_query($conn, $sql);
+        if ($result != null) {
+            // Get user's password hash from database
+            $row = mysqli_fetch_assoc($result);
+            //$hash = $row['Password'];
+            //$hash = password_hash($_POST['password'], PASSWORD_DEFAULT);
+            // Verify password
+            if ($row != null) {
+                if ($row['isActivated'] == false) {
+                    echo ("<script>alert('Please verify your account!');</script>");
+                    //header("Location: ../index.php");
+                    exit;
+                }
+                if (password_verify($password, $row['Password_hash'])) {
+                    // Start session and redirect to home page
+                    session_start();
+                    $_SESSION['username'] = $row['Name'];
+                    $_SESSION['surname'] = $row["Surname"];
+                    $_SESSION['email'] = $row["Email"];
+                    $_SESSION['loggedin'] = true;
+                    header("Location: ../index.php");
+                    exit;
+                } else {
+                    $incorrect_password = "Incorrect password!";
+                    $password = '';
+                }
+            } else {
+                $incorrect_email = "Email not found!";
+                $email = '';
+            }
         }
-    } else {
-        $incorrect_email = "Email not found!";
-        $email = '';
+        // Close database connection
+        mysqli_close($conn);
     }
-    // Close database connection
-    mysqli_close($conn);
 }
 
 ?>
@@ -110,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 ?>
                 <!-- logo-login -->
                 <div class="logo-login">
-                    <a href="index.html"><img src="../assets/img/logo/loder.png" alt=""></a>
+                    <a href="../index.php"><img src="../assets/img/logo/loder.png" alt=""></a>
                 </div>
                 <h2>Login Here</h2>
                 <div class="form-input">
