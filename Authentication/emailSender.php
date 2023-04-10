@@ -10,6 +10,7 @@ require '../vendor/autoload.php';
 $mail = new PHPMailer(true);
 
 try {
+
     //generate random number
     $random_number = random_int(100000, 999999);
 
@@ -58,6 +59,7 @@ try {
     $mail->Body = 'Please click the link below to activate your account: <a href="http://localhost:3000/Authentication/confirm.php?code=' . $random_number . '">Confirm Email</a>';
     // Replace the plain text body with one created manually
     $mail->AltBody = 'This is a plain-text message body';
+    session_start();
     $_SESSION['code'] = $random_number;
     // Attach an image file
 

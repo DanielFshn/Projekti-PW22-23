@@ -1,6 +1,7 @@
 <?php
+session_start();
 include("../dbContext.php");
-if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
+if (isset($_SESSION["loggedin"])) {
     header("Location: ../index.php");
     exit;
 }
@@ -42,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
                 if (password_verify($password, $row['Password_hash'])) {
                     // Start session and redirect to home page
-                    session_start();
+                    //session_start();
                     $_SESSION['username'] = $row['Name'];
                     $_SESSION['surname'] = $row["Surname"];
                     $_SESSION['email'] = $row["Email"];

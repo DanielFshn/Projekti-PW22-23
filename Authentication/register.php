@@ -1,7 +1,12 @@
 <?php
+session_start();
+if (isset($_SESSION["loggedin"])) {
+    header("Location: ../index.php");
+    exit;
+}
 include("../dbContext.php");
-$name = $surname = $email =  $password = "";
-$name_err = $surname_err = $email_err =  $password_err = "";
+$name = $surname = $email =  $password = $cpassword = "";
+$name_err = $surname_err = $email_err =  $password_err =  $cpassword_error = "";
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     //see if this email exist in database
@@ -27,14 +32,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $email_err = "Please enter email.";
     } else {
         $email = trim($_POST["email"]);
-        $_SESSION['firstEmail'] = $email;
     }
 
     if (empty(trim($_POST["password"]))) {
         $password_err = "Please enter your password.";
     } else {
-        $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+        if (preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/", $_POST["password"])) {
+            $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+        } else {
+            $password_err = 'Please enter a valid password!';
+        }
     }
+    if (empty(trim($_POST["cpassword"]))) {
+        $cpassword_err = "Please enter your confirm password.";
+    }
+    if ($password != $cpassword) {
+        $cpassword_err = "Passwords doesn't match!";
+        $password = '';
+        $cpassword = '';
+    }
+
     // Prepare the SQL statement to insert user
     if (empty($name_err) && empty($surname_err) && empty($email_err) && empty($password_err)) {
         $sql = "INSERT INTO `users`(`Name`, `Surname`, `Email`, `Password_hash`,`isActivated`) VALUES ('$name','$surname','$email','$password','0')";
@@ -50,6 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 }
+$_SESSION['firstEmail'] = $email;
+//echo ("email : " . $_SESSION['firstEmail']);
 ?>
 
 
@@ -106,9 +125,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             <div class="login-form">
                 <?php
-                if (!empty($name_err) || !empty($password_err) || !empty($email_err) || !empty($surname_err)) {
+                if (!empty($name_err) || !empty($password_err) || !empty($email_err) || !empty($surname_err) || !empty($cpassword_err)) {
                     echo '<div class="alert alert-danger">' . $name_err . "<br>" . $surname_err .
-                        "<br>" . $email_err . "<br>" .  $password_err . '</div>';
+                        "<br>" . $email_err . "<br>" .  $password_err . "<br>" . $cpassword_err . '</div>';
                 }
                 ?>
                 <!-- logo-login -->
@@ -135,7 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
                 <div class="form-input">
                     <label for="name">Confirm Password</label>
-                    <input type="password" name="password" value="<?php echo $password; ?>">
+                    <input type="password" name="cpassword" value="<?php echo $password; ?>">
                 </div>
                 <div class="form-input pt-30">
                     <input type="submit" name="submit" value="Registration">

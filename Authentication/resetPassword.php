@@ -1,6 +1,10 @@
 <?php
 session_start();
 include("../dbContext.php");
+if (!isset($_SESSION["loggedin"])) {
+    header("Location: ../index.php");
+    exit;
+}
 $incorrect_old_pass = $incorrect_new_pass = "";
 $incorrect_repeat_pass = "";
 $oldPass = $newPass = $repeatPass = "";
@@ -8,6 +12,8 @@ $password_match_error = '';
 $actual_pass_error = '';
 if (isset($_SESSION["email"])) {
     $email = $_SESSION['email'];
+    echo ("email : " . $email);
+
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (empty(trim($_POST["actualPass"]))) {
             $incorrect_old_pass = "Please enter old password!";
@@ -25,42 +31,45 @@ if (isset($_SESSION["email"])) {
             $repeatPass = trim($_POST["repeatPass"]);
         }
         //check if password is correct
-        $oldPassHash = password_hash($oldPass, PASSWORD_DEFAULT);
+        //$oldPassHash = password_hash($oldPass, PASSWORD_DEFAULT);
         $getActualPass = "SELECT * FROM users WHERE Email='$email'";
         $result = mysqli_query($conn, $getActualPass);
-        $row = mysqli_fetch_assoc($result);
-        if ($oldPass != '') {
-            echo("Password_hash" . $row['Password_hash']);
-            echo("old pass: " . $oldPassHash);
-            if (password_verify($oldPass,PASSWORD_DEFAULT)) {
-                $actual_pass_error = "Old password is wrong!";
+        if ($result != null) {
+            $row = mysqli_fetch_assoc($result);
+        }
+        echo ("Password_hash" . $row['Password_hash']);
+        //echo ("old pass: " . $oldPassHash);
+        if (!password_verify($oldPass, $row['Password_hash'])) {
+            $actual_pass_error = "Old password is wrong!";
+            $oldPass = '';
+            $newPass = '';
+            $repeatPass = '';
+        } else {
+            if ($newPass != '' && $repeatPass != '') {
+                if ($newPass == $repeatPass) {
+                    //$sql = "SELECT * FROM users WHERE Email='$email'";
+                    //$result = mysqli_query($conn, $sql);
+                    //if ($result != null) {
+                    // Get user's password hash from database
+                    //$row = mysqli_fetch_assoc($result);
+                    //$hash = $row['Password'];
+                    $hash = password_hash($_POST['newPass'], PASSWORD_DEFAULT);
+                    $updateSql = "UPDATE `users` SET `Password_hash`='$hash' WHERE Email='$email'";
+                    $sqlResult = mysqli_query($conn, $updateSql);
+                    if ($sqlResult) {
+                        echo ("<script>alert('Password Changes Successfully');</script>");
+                    }
+                }
+            } else {
+                $password_match_error = "Password doesn't match!";
                 $oldPass = '';
                 $newPass = '';
                 $repeatPass = '';
             }
-        } else {
-            if ($newPass != '' && $repeatPass != '') {
-                if ($newPass == $repeatPass) {
-                    $sql = "SELECT * FROM users WHERE Email='$email'";
-                    $result = mysqli_query($conn, $sql);
-                    if ($result != null) {
-                        // Get user's password hash from database
-                        $row = mysqli_fetch_assoc($result);
-                        //$hash = $row['Password'];
-                        $hash = password_hash($_POST['newPass'], PASSWORD_DEFAULT);
-                        $updateSql = "UPDATE `users` SET `Password_hash`='$hash' WHERE Email='$email'";
-                        $sqlResult = mysqli_query($conn, $updateSql);
-                    }
-                } else {
-                    $password_match_error = "Password doesn't match!";
-                    $oldPass = '';
-                    $newPass = '';
-                    $repeatPass = '';
-                }
-            }
         }
     }
 }
+
 
 
 

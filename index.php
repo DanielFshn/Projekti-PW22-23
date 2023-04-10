@@ -56,7 +56,6 @@
                                     if (isset($_SESSION['username']) && $_SESSION['username'] != "") {
                                         echo ("Hello " . $_SESSION['username']);
                                     }
-
                                     ?>
                                 </div>
                             </div>
@@ -72,14 +71,19 @@
                                                 if (isset($_SESSION["email"]) && $_SESSION["email"] != "") {
                                                     $buttonStyle = "display: none;";
                                                     $logOutButtonStyle = "";
+                                                    $changePasswordStyle = "";
+                                                    $joinForFree = "";
                                                 } else {
                                                     $buttonStyle = "";
                                                     $logOutButtonStyle = "display: none;";
+                                                    $changePasswordStyle = "display: none;";
+                                                    $joinForFree = "display: none;";
                                                 }
                                                 ?>
                                                 <li class="button-header margin-left" style="<?php echo $buttonStyle; ?>"><a href="./Authentication/register.php" class="btn">Join</a></li>
                                                 <li class="button-header" style="<?php echo $buttonStyle; ?>"><a href="./Authentication/login.php" class="btn btn3">Log in</a></li>
                                                 <li class="button-header" style="<?php echo $logOutButtonStyle; ?>"><a href="./Authentication/logOut.php" class="btn btn3">Log Out</a></li>
+                                                <li class="button-header" style="<?php echo $changePasswordStyle; ?>"><a href="./Authentication/resetPassword.php" class="btn btn3">Reset Password</a></li>
 
                                             </ul>
                                         </nav>

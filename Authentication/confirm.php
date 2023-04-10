@@ -1,16 +1,29 @@
 <?php
 session_start();
+
 include("../dbContext.php");
-if (isset($_SESSION['code'])) {
-    $code = $_GET['code'];
-    $email = $_SESSION['firstEmail'];
-   
-    $sql = "SELECT * FROM users WHERE Email='$email'";
-    $result = mysqli_query($conn, $sql);
-    if ($result != null) {
-        $row = mysqli_fetch_assoc($result);
-        $updateSql = "UPDATE `users` SET `isActivated`='1' WHERE Email='$email'";
-        $sqlResult = mysqli_query($conn, $updateSql);
+if (isset($_GET['code'])) {
+    if (isset($_SESSION['code'])) {
+        if ($_GET['code'] == $_SESSION['code']) {
+            $code = $_GET['code'];
+            if (isset($_SESSION['firstEmail'])) {
+                echo ('email : ' . $_SESSION['firstEmail']);
+                $email = $_SESSION['firstEmail'];
+                //$email = mysqli_real_escape_string($conn, $email);
+                echo ("email : " . $email);
+                $updateSql = "UPDATE `users` SET `isActivated`='1' WHERE Email='$email'";
+                $sqlResult = mysqli_query($conn, $updateSql);
+                if ($sqlResult) {
+                    echo ('User is verified successfully');
+                } else {
+                    echo (mysqli_error($conn));
+                }
+            } else {
+                echo ("email is not send");
+            }
+        } else {
+            echo ("<script>alert('Error!');</script>");
+        }
     }
 }
 ?>
@@ -32,15 +45,27 @@ if (isset($_SESSION['code'])) {
 </head>
 
 <body>
+    <?php
+    if (isset($_GET['code'])) {
+        if (isset($_SESSION['code'])) {
+            if ($_GET['code'] == $_SESSION['code']) {
+                $html = '
     <div class="container">
         <form id="resetPassword">
-            <h6 style="color: white;">Your account is activated!</h6>
+            <h6>Your account is activated!</h6>
             <div class="btn-group">
-                <button id="goHome" class="btn btn-primary active">Go Home</button>
+                <button type="submit" class="btn btn-success"><a href="./login.php">Log In Now</a></button>
+
             </div>
         </form>
-
-        <script src="authenticationScript.js"></script>
+      ';
+                echo ($html);
+            }
+        }
+    } else {
+        echo ("Error!");
+    }
+    ?>
 </body>
 
 </html>
