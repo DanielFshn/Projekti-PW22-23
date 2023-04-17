@@ -39,7 +39,7 @@ try {
     $mail->Username = 'daniel_rakipllari.fshnstudent@unitir.edu.al';
 
     // SMTP password
-    $mail->Password = 'BalenamoD01';
+    $mail->Password = 'test';
 
     // Set who the message is to be sent from
     $mail->setFrom('daniel_rakipllari.fshnstudent@unitir.edu.al', 'Your Name');
