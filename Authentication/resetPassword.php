@@ -2,7 +2,10 @@
 session_start();
 include("../dbContext.php");
 if (!isset($_SESSION["loggedin"])) {
-    header("Location: ../index.php");
+    //header("Location: ../index.php");
+    echo ("<script>alert('Please log in first to change password!');</script>");
+    $url = "http://localhost:3000/index.php";
+    header("refresh:0;url=$url");
     exit;
 }
 $incorrect_old_pass = $incorrect_new_pass = "";
@@ -12,7 +15,7 @@ $password_match_error = '';
 $actual_pass_error = '';
 if (isset($_SESSION["email"])) {
     $email = $_SESSION['email'];
-    echo ("email : " . $email);
+    //echo ("email : " . $email);
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (empty(trim($_POST["actualPass"]))) {
@@ -37,7 +40,7 @@ if (isset($_SESSION["email"])) {
         if ($result != null) {
             $row = mysqli_fetch_assoc($result);
         }
-        echo ("Password_hash" . $row['Password_hash']);
+        //echo ("Password_hash" . $row['Password_hash']);
         //echo ("old pass: " . $oldPassHash);
         if (!password_verify($oldPass, $row['Password_hash'])) {
             $actual_pass_error = "Old password is wrong!";
@@ -58,14 +61,16 @@ if (isset($_SESSION["email"])) {
                     $sqlResult = mysqli_query($conn, $updateSql);
                     if ($sqlResult) {
                         echo ("<script>alert('Password Changes Successfully');</script>");
+                        $url = "http://localhost:3000/index.php";
+                        header("refresh:0;url=$url");
                     }
+                }else {
+                    $password_match_error = "Password doesn't match!";
+                    $oldPass = '';
+                    $newPass = '';
+                    $repeatPass = '';
                 }
-            } else {
-                $password_match_error = "Password doesn't match!";
-                $oldPass = '';
-                $newPass = '';
-                $repeatPass = '';
-            }
+            } 
         }
     }
 }

@@ -7,10 +7,10 @@ if (isset($_GET['code'])) {
         if ($_GET['code'] == $_SESSION['code']) {
             $code = $_GET['code'];
             if (isset($_SESSION['firstEmail'])) {
-                echo ('email : ' . $_SESSION['firstEmail']);
+                //echo ('email : ' . $_SESSION['firstEmail']);
                 $email = $_SESSION['firstEmail'];
                 //$email = mysqli_real_escape_string($conn, $email);
-                echo ("email : " . $email);
+                //echo ("email : " . $email);
                 $updateSql = "UPDATE `users` SET `isActivated`='1' WHERE Email='$email'";
                 $sqlResult = mysqli_query($conn, $updateSql);
                 if ($sqlResult) {

@@ -38,7 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($row != null) {
                 if ($row['isActivated'] == false) {
                     echo ("<script>alert('Please verify your account!');</script>");
-                    //header("Location: ../index.php");
+                    $url = "http://localhost:3000/index.php";
+                    header("refresh:0;url=$url");
                     exit;
                 }
                 if (password_verify($password, $row['Password_hash'])) {
@@ -125,18 +126,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
                 <h2>Login Here</h2>
                 <div class="form-input">
-                    <label for="email">Email</label>
+                    <label for="email">Email <span style="color: red;">*</span></label>
                     <input type="email" name="email" value="<?php echo $email; ?>">
                 </div>
                 <div class="form-input">
-                    <label for="password">Password</label>
+                    <label for="password">Password <span style="color: red;">*</span></label>
                     <input type="password" name="password">
                 </div>
                 <div class="form-input pt-30">
                     <input type="submit" name="submit" value="Login">
                 </div>
 
-                <a href="../Authentication/emailForReset.php" class="forget">Forget Password</a>
+                <a href="../Authentication/resetPassword.php" class="forget">Forget Password</a>
                 <a href="../Authentication/register.php" class="registration">Registration</a>
                 <a href="../index.php" class="registration">Home</a>
             </div>

@@ -120,27 +120,110 @@
                 </div>
             </div>
         </section>
-        <!-- ? services-area -->
-        <!-- footer-bottom area -->
-        <div class="footer-bottom-area">
+
+        <!-- Courses area start -->
+        <!--Partial VIEW-->
+        <div class="courses-area section-padding40 fix">
             <div class="container">
-                <div class="footer-border">
-                    <div class="row d-flex align-items-center">
-                        <div class="col-xl-12 ">
-                            <div class="footer-copy-right text-center">
-                                <p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                                    Copyright &copy;<script>
-                                        document.write(new Date().getFullYear());
-                                    </script> All rights reserved
-                                    <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                                </p>
+                <div class="row justify-content-center">
+                    <div class="col-xl-7 col-lg-8">
+                        <div class="section-tittle text-center mb-55">
+                            <h2>Our featured clothes</h2>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="row properties__caption carousel slide ">
+                    <?php
+                    include("dbContext.php");
+                    $sql = "SELECT * FROM products";
+                    $result = $conn->query($sql);
+                    if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            echo '<div class="col-md-4">
+                        <div class="properties properties2 mb-30">
+                            <div class="properties__card">
+                                <div class="properties__img overlay1">
+                                    <img src="../Doc/img/' . $row["ImageUrl"] . '" />
+                                </div>
+                                <div class="properties__caption">
+                                    <p>' . $row["ProductName"] . '</p>
+                                    <h3> ' . $row["Description"] . '</h3>
+                                    <h3>' . $row["GenderId"] . '</h3>
+                                    <h3>' . $row["SizeId"] . '</h3>
+                                    <div class="properties__footer d-flex justify-content-between align-items-center">
+                                        <div class="restaurant-name">
+                                            <div class="rating">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star-half"></i>
+                                            </div>
+                                            <p><span>(4.5)</span></p>
+                                        </div>
+                                        <div class="price">
+                                            <span>100</span>
+                                        </div>
+
+                                    </div>
+
+                                    <div style="width: 500px !important">
+                                        <div class="input-group mb-3 w-100">
+                                            <input type="hidden" value="'.$row["ProductId"].'" name="id" />
+                                            <div class="input-group-append w-100">
+                                                <button id="rrrr" class="btn btn-outline-primary" type="submit">
+                                                    Add
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a href="help.php" class="border-btn border-btn2">Find out more</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                ';
+                        }
+                    } else {
+                        echo "<p>Nuk ka asnje produkt!</p>";
+                    }
+                    ?>
+<div class="row properties__caption carousel slide ">
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-xl-7 col-lg-8">
+                        <div class="section-tittle text-center mt-40">
+                            <a href="/Course/Index" class="border-btn">Load More</a>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- ? services-area -->
+            <!-- footer-bottom area -->
+            <div class="footer-bottom-area">
+                <div class="container">
+                    <div class="footer-border">
+                        <div class="row d-flex align-items-center">
+                            <div class="col-xl-12 ">
+                                <div class="footer-copy-right text-center">
+                                    <p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                                        Copyright &copy;<script>
+                                            document.write(new Date().getFullYear());
+                                        </script>
+                                        <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <!-- Footer End-->
+            <!-- Footer End-->
         </div>
         </footer>
         <!-- Scroll Up -->

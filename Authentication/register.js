@@ -20,7 +20,7 @@ const sendData = (usernameVal, sRate, Count) => {
 const SuccessMsg = (usernameVal) => {
     let formInp = document.getElementsByClassName('form-input');
     var Count = formInp.length - 1;
-    for(var i = 0; i < formContr.length; i++){
+    for(var i = 0; i < formInp.length; i++){
         if(formInp[i].className === "form-input success"){
             var sRate = 0 + i;
             console.log(sRate);
