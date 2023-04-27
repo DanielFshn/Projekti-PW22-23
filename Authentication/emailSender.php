@@ -36,30 +36,31 @@ try {
     $mail->SMTPAuth = true;
 
     // SMTP username
-    $mail->Username = 'daniel_rakipllari.fshnstudent@unitir.edu.al';
+    //$mail->Username = 'daniel_rakipllari.fshnstudent@unitir.edu.al';
+    $mail->Username = 'onlineclothingstore02@outlook.com';
 
     // SMTP password
-    $mail->Password = 'test';
+    $mail->Password = 'BalenamoD01';
 
     // Set who the message is to be sent from
-    $mail->setFrom('daniel_rakipllari.fshnstudent@unitir.edu.al', 'Your Name');
+    $mail->setFrom('onlineclothingstore02@outlook.com', 'Your Name');
 
     // Set an alternative reply-to address
     // $mail->addReplyTo('replyto@example.com', 'First Last');
 
     // Set who the message is to be sent to
-    $mail->addAddress('daniel_rakipllari.fshnstudent@unitir.edu.al');
+    $mail->addAddress('onlineclothingstore02@outlook.com');
 
     // Set the subject line
-    $mail->Subject = 'User configuration';
+    $mail->Subject = 'User email configuration';
 
     // Read an HTML message body from an external file, convert referenced images to embedded,
     // convert HTML into a basic plain-text alternative body
     $mail->isHTML(true);
-    $mail->Body = 'Please click the link below to activate your account: <a href="http://localhost:3000/Authentication/confirm.php?code=' . $random_number . '">Confirm Email</a>';
+    $mail->Body = 'Dear, Thank you for signing up for our service! To complete your user account setup, please click on the following link to configure your email settings: <a href="http://localhost:3000/Authentication/confirm.php?code=' . $random_number . '">Confirm Email</a>';
     // Replace the plain text body with one created manually
     $mail->AltBody = 'This is a plain-text message body';
-    session_start();
+    //session_start();
     $_SESSION['code'] = $random_number;
     // Attach an image file
 
