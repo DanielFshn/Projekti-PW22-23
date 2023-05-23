@@ -40,7 +40,7 @@ try {
     $mail->Username = 'onlineclothingstore02@outlook.com';
 
     // SMTP password
-    $mail->Password = 'BalenamoD01';
+    $mail->Password = '********';
 
     // Set who the message is to be sent from
     $mail->setFrom('onlineclothingstore02@outlook.com', 'Your Name');
