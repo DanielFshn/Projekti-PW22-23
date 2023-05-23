@@ -1,3 +1,7 @@
+<?php
+include('inc/ReviewHeader.php');
+
+?>
 <!doctype html>
 <html class="no-js" lang="zxx">
 
@@ -28,6 +32,9 @@
 </head>
 
 <body>
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="./Products/deleteScript.js"></script>
     <!-- ? Preloader Start -->
     <div id="preloader-active">
         <div class="preloader d-flex align-items-center justify-content-center">
@@ -53,6 +60,13 @@
                                     <a href="index.php"><img src="assets/img/hero/OIP.jpg" alt="logoPhoto" class="fluid-image" style="width:20%;"></a>
                                     <?php
                                     session_start();
+                                    //if (isset($_SESSION["role"])) {
+                                    //  if ($_SESSION["role"] == "admin") {
+                                    //    echo ("Useri eshte admin");
+                                    //} else {
+                                    //  echo ("Useri eshte i thjeshte");
+                                    // }
+                                    //}
                                     if (isset($_SESSION['username']) && $_SESSION['username'] != "") {
                                         echo ("Hello " . $_SESSION['username']);
                                     }
@@ -66,6 +80,28 @@
                                         <nav>
                                             <ul id="navigation">
                                                 <li class="active"><a href="index.php" class="text-secondary">Home</a></li>
+                                                <li class="active"><a href="./Products/allProducts.php" class="text-secondary">Products</a></li>
+                                                <?php
+                                                if (isset($_SESSION["role"]) && $_SESSION["role"] != "") {
+                                                    if ($_SESSION['role'] == "admin") {
+                                                        $sizesStyle = "";
+                                                        $categoryStyle = "";
+                                                        $cardStyle = "display: none";
+                                                    } else {
+                                                        $sizesStyle = "display: none;";
+                                                        $categoryStyle = "display: none;";
+                                                        $cardStyle = "";
+                                                    }
+                                                } else {
+                                                    $sizesStyle = "display: none;";
+                                                    $cardStyle = "display: none";
+                                                    $categoryStyle = "display: none;";
+                                                }
+                                                ?>
+                                                <li class="active" style="<?php echo $cardStyle ?>"><a href="./Card/displayUserCard.php"  class="text-secondary">Card</a></li>
+                                                <li class="active"><a href="./ProductSizes/allSizes.php" style="<?php echo $sizesStyle; ?>" class="text-secondary">Manage Sizes</a></li>
+                                                <li class="active"><a href="./Categories/index.php" style="<?php echo $categoryStyle; ?>" class="text-secondary">Manage Categories</a></li>
+
                                                 <!-- Button -->
                                                 <?php
                                                 if (isset($_SESSION["email"]) && $_SESSION["email"] != "") {
@@ -81,10 +117,9 @@
                                                 }
                                                 ?>
                                                 <li class="button-header margin-left" style="<?php echo $buttonStyle; ?>"><a href="./Authentication/register.php" class="btn">Join</a></li>
-                                                <li class="button-header" style="<?php echo $buttonStyle; ?>"><a href="./Authentication/login.php" class="btn btn3">Log in</a></li>
-                                                <li class="button-header" style="<?php echo $logOutButtonStyle; ?>"><a href="./Authentication/logOut.php" class="btn btn3">Log Out</a></li>
-                                                <li class="button-header" style="<?php echo $changePasswordStyle; ?>"><a href="./Authentication/resetPassword.php" class="btn btn3">Reset Password</a></li>
-
+                                                <li class="button-header" style="<?php echo $buttonStyle; ?>"><a href="./Authentication/login.php" class="btn">Log in</a></li>
+                                                <li class="button-header" style="<?php echo $logOutButtonStyle; ?>"><a href="./Authentication/logOut.php" class="btn">Log Out</a></li>
+                                                <li class="button-header" style="<?php echo $changePasswordStyle; ?>"><a href="./Authentication/resetPassword.php" class="btn">Reset Password</a></li>
                                             </ul>
                                         </nav>
                                     </div>
@@ -128,7 +163,7 @@
                 <div class="row justify-content-center">
                     <div class="col-xl-7 col-lg-8">
                         <div class="section-tittle text-center mb-55">
-                            <h2>Our featured clothes</h2>
+                            <h2>The newest clothes</h2>
 
                         </div>
                     </div>
@@ -136,21 +171,50 @@
                 <div class="row properties__caption carousel slide ">
                     <?php
                     include("dbContext.php");
-                    $sql = "SELECT * FROM products";
+
+                    $sql = "SELECT * FROM products WHERE CreatedOn >= DATE_SUB(NOW(), INTERVAL 20 DAY) AND IsRelease = 1 ORDER BY CreatedOn DESC LIMIT 9;";
                     $result = $conn->query($sql);
                     if ($result->num_rows > 0) {
                         while ($row = $result->fetch_assoc()) {
-                            echo '<div class="col-md-4">
+                            $product_id = $row["ProductId"];
+                            $stmt = "SELECT categories.CategoryName FROM categories JOIN products ON categories.CategoryId = products.CategoryId WHERE products.ProductId = $product_id";
+                            $resultJoin = $conn->query($stmt);
+                            if ($resultJoin->num_rows > 0) {
+                                while ($row2 = $resultJoin->fetch_assoc()) {
+                                    $genderQuery = "SELECT genders.GenderName FROM genders JOIN products ON genders.GenderId = products.GenderId WHERE products.ProductId = $product_id";
+                                    $resultGenderJoin = $conn->query($genderQuery);
+                                    if ($resultGenderJoin->num_rows > 0) {
+                                        while ($rowGender = $resultGenderJoin->fetch_assoc()) {
+                                            $sizeQuery = "SELECT sizes.SizeName FROM sizes JOIN products ON sizes.SizeId = products.SizeId WHERE products.ProductId = $product_id";
+                                            $resultSize = $conn->query($sizeQuery);
+
+                                            if ($resultSize->num_rows > 0) {
+                                                // Fetch a single row
+                                                $rowSize = $resultSize->fetch_assoc();
+                                                $editBtn = '';
+                                                //echo("Test" . $_SESSION['role']);
+                                                $deleteBtn = '';
+                                                if (isset($_SESSION['role']) &&  $_SESSION['role'] === 'admin') {
+                                                    $editBtn = '<a id="edit_btn" class="btn btn-outline-primary" href="../Products/edit.php?id=' . $row['ProductId'] . '" role="button">Edit</a>';
+                                                    $deleteBtn = '<a id="delete_btn" class="btn btn-outline-primary" href="../Products/delete.php?id=' . $row['ProductId'] . '" role="button">Delete</a>';
+                                                    //$deleteBtn = '<button type="button" value="' . $row['ProductId'] . '" class="btn btn-outline-primary delete_product_btn">Delete</button>';
+                                                }
+                                            
+
+
+                                                echo '<div class="col-md-4">
                         <div class="properties properties2 mb-30">
                             <div class="properties__card">
                                 <div class="properties__img overlay1">
                                     <img src="../Doc/img/' . $row["ImageUrl"] . '" />
                                 </div>
                                 <div class="properties__caption">
-                                    <p>' . $row["ProductName"] . '</p>
-                                    <h3> ' . $row["Description"] . '</h3>
-                                    <h3>' . $row["GenderId"] . '</h3>
-                                    <h3>' . $row["SizeId"] . '</h3>
+                                    <p>Product name: ' . $row["ProductName"] . '</p>
+                                    <h3>Description: ' . $row["Description"] . '</h3>
+                                    <h3>Category:' .  $row2["CategoryName"] . '</h3>
+                                    <h3>Gender: ' . $rowGender["GenderName"] . '</h3>
+                                    <h3>Size: ' . $rowSize["SizeName"] . '</h3>
+                                    
                                     <div class="properties__footer d-flex justify-content-between align-items-center">
                                         <div class="restaurant-name">
                                             <div class="rating">
@@ -160,70 +224,81 @@
                                                 <i class="fas fa-star"></i>
                                                 <i class="fas fa-star-half"></i>
                                             </div>
-                                            <p><span>(4.5)</span></p>
+                                            <p><span>(4.5)</span></p><br>
+                                            <a href="show_rating.php?item_id=' . $row['ProductId'] . '" style="color:black;">Rating & Reviews</a>
                                         </div>
                                         <div class="price">
-                                            <span>100</span>
+                                            <span>  ' . $row["Price"] . '$</span>
                                         </div>
 
                                     </div>
 
                                     <div style="width: 500px !important">
                                         <div class="input-group mb-3 w-100">
-                                            <input type="hidden" value="'.$row["ProductId"].'" name="id" />
+                                            <input type="hidden" value="' . $rowSize["SizeName"] . '" name="id" />
                                             <div class="input-group-append w-100">
-                                                <button id="rrrr" class="btn btn-outline-primary" type="submit">
-                                                    Add
-                                                </button>
-                                            </div>
+                                            <button class="btn btn-outline-primary add-to-cart-btn" type="submit" data-product-id="' . $row['ProductId'] . '">
+                                            Add
+                                                    </button>&nbsp;'
+                                                    . $editBtn .
+                                                    '&nbsp;
+                                                    ' . $deleteBtn . '
+                                                    
+                                                    </div>
                                         </div>
                                     </div>
-                                    <a href="help.php" class="border-btn border-btn2">Find out more</a>
+                                	<a href="../Products/productDetails.php?id=' . $row['ProductId'] . '" class="border-btn border-btn2">Find Out More</a>
+
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                </div>
+                
                 ';
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     } else {
                         echo "<p>Nuk ka asnje produkt!</p>";
                     }
                     ?>
-<div class="row properties__caption carousel slide ">
+                </div>
+                <div class="row properties__caption carousel slide ">
                 </div>
                 <div class="row justify-content-center">
                     <div class="col-xl-7 col-lg-8">
                         <div class="section-tittle text-center mt-40">
-                            <a href="/Course/Index" class="border-btn">Load More</a>
+                            <a href="#" class="border-btn">Load More</a>
                         </div>
                     </div>
                 </div>
-                </div>
             </div>
-
-            <!-- ? services-area -->
-            <!-- footer-bottom area -->
-            <div class="footer-bottom-area">
-                <div class="container">
-                    <div class="footer-border">
-                        <div class="row d-flex align-items-center">
-                            <div class="col-xl-12 ">
-                                <div class="footer-copy-right text-center">
-                                    <p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                                        Copyright &copy;<script>
-                                            document.write(new Date().getFullYear());
-                                        </script>
-                                        <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                                    </p>
-                                </div>
+        </div>
+        <!-- ? services-area -->
+        <!-- footer-bottom area -->
+        <div class="footer-bottom-area">
+            <div class="container">
+                <div class="footer-border">
+                    <div class="row d-flex align-items-center">
+                        <div class="col-xl-12 ">
+                            <div class="footer-copy-right text-center">
+                                <p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                                    Copyright &copy;<script>
+                                        document.write(new Date().getFullYear());
+                                    </script>
+                                    <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- Footer End-->
+        </div>
+        <!-- Footer End-->
         </div>
         </footer>
         <!-- Scroll Up -->
@@ -231,7 +306,31 @@
             <a title="Go to Top" href="#"> <i class="fas fa-level-up-alt"></i></a>
         </div>
     </main>
+    <script>
+        // Listen for clicks on the Add to Cart button
+        $('.add-to-cart-btn').click(function() {
+            var productId = $(this).data('product-id');
+            var button = $(this);
+            console.log("Id e produktiti" + productId);
+            // Send an AJAX request to add the product to the cart
+            $.ajax({
+                url: 'http://localhost:3000//Card/addToCard.php',
+                method: 'POST',
+                data: {
+                    product_id: productId
+                },
+                success: function(response) {
+                    // Change the button text to indicate that the product was added successfully
+                    button.text('Product added successfully!');
+                }
+            });
+        });
+    </script>
     <!-- JS here -->
+    <script src=" https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+
+
+
     <script src="./assets/js/vendor/modernizr-3.5.0.min.js"></script>
     <!-- Jquery, Popper, Bootstrap -->
     <script src="./assets/js/vendor/jquery-1.12.4.min.js"></script>

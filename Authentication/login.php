@@ -49,6 +49,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $_SESSION['surname'] = $row["Surname"];
                     $_SESSION['email'] = $row["Email"];
                     $_SESSION['loggedin'] = true;
+                    $userId = $row["Id"];
+                    $_SESSION['userid'] = $userId;
+                    //$_SESSION['userid'] = $userId;
+                    $sqlGetRoleName = "SELECT roles.Name FROM roles JOIN user_roles ON roles.Id = user_roles.Role_Id JOIN users ON user_roles.User_Id = users.Id WHERE users.Id = $userId";
+                    $resultRole = mysqli_query($conn, $sqlGetRoleName);
+                    if ($resultRole != null) {
+                        $rowRoles = mysqli_fetch_assoc($resultRole);
+                        $_SESSION["role"] = $rowRoles["Name"];
+                    }
                     header("Location: ../index.php");
                     exit;
                 } else {
@@ -137,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <input type="submit" name="submit" value="Login">
                 </div>
 
-                <a href="../Authentication/resetPassword.php" class="forget">Forget Password</a>
+                <a href="../Authentication/resetPassword.php" class="forget">Change Password</a>
                 <a href="../Authentication/register.php" class="registration">Registration</a>
                 <a href="../index.php" class="registration">Home</a>
             </div>
